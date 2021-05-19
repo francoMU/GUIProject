@@ -1,30 +1,29 @@
-from setuptools import setup
+from pathlib import Path
 
-requirements = [
-    # TODO: put your package requirements here
-]
+from setuptools import setup, find_packages
+
+with open(Path(__file__).parent / "requirements.txt", "r") as file:
+    requirements = file.readlines()
 
 setup(
     name='GUIProject',
     version='0.0.1',
     description="A PyQt5 GUI application",
-    author="Franco",
+    author="Franco Peter Moitzi",
     author_email='franco.moitzi@mcl.at',
     url='https://github.com/francoMU\/GUIProject',
-    packages=['guiproject', 'guiproject.images',
-              'guiproject.tests'],
+    packages=find_packages(),
+    install_requires=requirements,
     package_data={'guiproject.images': ['*.png']},
     entry_points={
         'console_scripts': [
-            'Template=guiproject.application:main'
+            'guiproject=guiproject.application:main'
         ]
     },
-    install_requires=requirements,
     zip_safe=False,
     keywords='GUIProject',
     classifiers=[
-        'Programming Language :: Python :: 3.3',
-        'Programming Language :: Python :: 3.4',
-        'Programming Language :: Python :: 3.5',
+        'Programming Language :: Python :: 3.7',
+        'Programming Language :: Python :: 3.8',
     ],
 )

@@ -103,7 +103,7 @@ class AboutDialog(QDialog):
         icons = QLabel('Material design icons created by Google')
         icons.setAlignment(Qt.AlignCenter)
 
-        github = QLabel('GitHub: francoMU\')
+        github = QLabel('GitHub: francoMU')
         github.setAlignment(Qt.AlignCenter)
 
         self.layout = QVBoxLayout()

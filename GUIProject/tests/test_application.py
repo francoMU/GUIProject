@@ -26,7 +26,7 @@ def test_window_geometry(window):
     assert window.height() == 768
 
 
-def test_open_file(window, qtbot, mock):
+def test_open_file(window, qtbot, mocker):
     """Test the Open File item of the File submenu.
 
     Qtbot clicks on the file sub menu and then navigates to the Open File item. Mock creates
@@ -34,11 +34,11 @@ def test_open_file(window, qtbot, mock):
     """
     qtbot.mouseClick(window.file_sub_menu, Qt.LeftButton)
     qtbot.keyClick(window.file_sub_menu, Qt.Key_Down)
-    mock.patch.object(QFileDialog, 'getOpenFileName', return_value=('', ''))
+    mocker.patch.object(QFileDialog, 'getOpenFileName', return_value=('', ''))
     qtbot.keyClick(window.file_sub_menu, Qt.Key_Enter)
 
 
-def test_about_dialog(window, qtbot, mock):
+def test_about_dialog(window, qtbot, mocker):
     """Test the About item of the Help submenu.
 
     Qtbot clicks on the help sub menu and then navigates to the About item. Mock creates
@@ -46,5 +46,5 @@ def test_about_dialog(window, qtbot, mock):
     """
     qtbot.mouseClick(window.help_sub_menu, Qt.LeftButton)
     qtbot.keyClick(window.help_sub_menu, Qt.Key_Down)
-    mock.patch.object(QDialog, 'exec_', return_value='accept')
+    mocker.patch.object(QDialog, 'exec_', return_value='accept')
     qtbot.keyClick(window.help_sub_menu, Qt.Key_Enter)
