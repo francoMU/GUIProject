@@ -2,7 +2,7 @@ import string
 from pathlib import Path
 
 import pytest
-from guiproject.utils import splitted_line
+from guiproject.utils import splitted_line, get_index
 
 PATH = Path(__file__).parent
 
@@ -13,14 +13,20 @@ def example_text():
         yield file.read()
 
 
+def test_get_index():
 
-def test_splitting_simple_lines():
+    indices = get_index([8, 10, 12, 15, 18], 14)
 
-    text = """toooooooooookjkoooolong jhgj jkjh"""
+    assert indices == 12
 
-    formatted_text = splitted_line(text, 14)
+    indices = get_index([8, 10, 12, 15, 18], 7)
 
-    print(formatted_text)
+    assert indices == 8
+
+    indices = get_index([], 7)
+
+    assert indices is None
+
 
 
 

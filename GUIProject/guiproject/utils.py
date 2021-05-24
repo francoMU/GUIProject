@@ -1,5 +1,5 @@
 import string
-from typing import Iterable
+from typing import Iterable, List
 
 
 def find_whitespaces(line: str) -> Iterable[int]:
@@ -7,6 +7,21 @@ def find_whitespaces(line: str) -> Iterable[int]:
 
         if character in string.whitespace:
             yield index
+
+
+def get_index(indices: List[int], width):
+    ws_list = [item for item in indices if item < width]
+
+    if ws_list:
+        return max(ws_list)
+
+    ws_list = [item for item in indices if item >= width]
+
+    if ws_list:
+        return min(ws_list)
+
+    return
+
 
 
 def splitted_line(text: str, width: int) -> str:
@@ -34,18 +49,18 @@ def splitted_line(text: str, width: int) -> str:
 
                 ws_list = list(filter(lambda x: x < starting_value, indices))
 
-                while ws_list:
+                # while ws_list:
 
-                    ws = max(ws_list)
-                    splitted_line[ws] = '\n'
+                #    ws = max(ws_list)
+                #    splitted_line[ws] = '\n'
 
-                    starting_value = ws + width + 1
+                #    starting_value = ws + width + 1
 
-                    if starting_value > line_length:
-                        break
+                #    if starting_value > line_length:
+                #        break
 
-                    ws_list = list(
-                        filter(lambda x: x < starting_value, indices))
+                #   ws_list = list(
+                #       filter(lambda x: x < starting_value, indices))
 
         final_lines.append(''.join(splitted_line))
 
