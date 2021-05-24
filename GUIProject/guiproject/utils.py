@@ -1,15 +1,15 @@
 import string
-from typing import Iterable, List
+from typing import List, Generator, Iterable
 
 
-def find_whitespaces(line: str) -> Iterable[int]:
+def find_whitespaces(line: str) -> Generator[int, None, None]:
     for index, character in enumerate(line):
 
         if character in string.whitespace:
             yield index
 
 
-def get_index(indices: List[int], width):
+def get_index(indices: Iterable[int], width):
     ws_list = [item for item in indices if item < width]
 
     if ws_list:
@@ -22,6 +22,26 @@ def get_index(indices: List[int], width):
 
     return
 
+
+def split_line(line: str, width: int) -> str:
+    # convert line to list in order to make it mutable
+
+    mutable_line = list(line)
+
+    indices = find_whitespaces(line.rstrip())
+
+    print(indices)
+
+    if indices:
+        print("is not empty")
+        replace_index = get_index(indices, width)
+
+        if replace_index:
+            mutable_line[replace_index] = '\n'
+    else:
+        print("is empty")
+
+    return ''.join(mutable_line)
 
 
 def splitted_line(text: str, width: int) -> str:
