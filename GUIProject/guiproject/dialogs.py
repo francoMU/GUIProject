@@ -6,7 +6,7 @@ from PyQt5.QtCore import Qt
 from PyQt5.QtGui import QIcon, QFont, QWheelEvent
 from PyQt5.QtWidgets import QDialog, QLabel, QVBoxLayout, QGridLayout, \
     QWidgetItem
-from guiproject.utils import find_whitespaces
+from guiproject.utils import splitted_line
 
 
 class AboutDialog(QDialog):
@@ -36,8 +36,8 @@ class AboutDialog(QDialog):
 
         self.split_lines(license_text)
 
-        license = QLabel(license_text)
-        license.setAlignment(Qt.AlignCenter)
+        self.license = QLabel(license_text)
+        self.license.setAlignment(Qt.AlignCenter)
 
         self.main_layout = QVBoxLayout()
         self.main_layout.setAlignment(Qt.AlignVCenter)
@@ -77,16 +77,7 @@ class AboutDialog(QDialog):
     def split_lines(self, text: str, width=120):
         """This method splits lines after certain number of characters"""
 
-        lines = text.splitlines()
-
-        for line in lines:
-            indices = list(find_whitespaces(line))
-
-            max(filter(lambda x: x < , indices))
-
-            print(indices)
-
-        # font.setFixedPitch(True)
+        return splitted_line(text, width)
 
     def change_font_size(self, size: float):
         """Changes all font sizes"""

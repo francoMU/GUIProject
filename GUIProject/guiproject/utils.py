@@ -1,5 +1,6 @@
 import string
-from typing import List, Generator, Iterable
+from collections import deque
+from typing import Generator, Iterable
 
 
 def find_whitespaces(line: str) -> Generator[int, None, None]:
@@ -10,17 +11,22 @@ def find_whitespaces(line: str) -> Generator[int, None, None]:
 
 
 def get_index(indices: Iterable[int], width):
-    ws_list = [item for item in indices if item < width]
+    min_list = deque(maxlen=1)
 
-    if ws_list:
-        return max(ws_list)
+    last_item = None
 
-    ws_list = [item for item in indices if item >= width]
+    for item in indices:
 
-    if ws_list:
-        return min(ws_list)
+        if item < width:
+            min_list.append(item)
+        else:
+            last_item = item
+            break
 
-    return
+    if min_list:
+        return min_list.pop()
+
+    return last_item
 
 
 def split_line(line: str, width: int) -> str:
@@ -30,16 +36,15 @@ def split_line(line: str, width: int) -> str:
 
     indices = find_whitespaces(line.rstrip())
 
-    print(indices)
-
     if indices:
-        print("is not empty")
         replace_index = get_index(indices, width)
 
-        if replace_index:
+        while replace_index:
             mutable_line[replace_index] = '\n'
-    else:
-        print("is empty")
+
+            start_index = width + replace_index + 1
+
+            replace_index = get_index(indices, start_index)
 
     return ''.join(mutable_line)
 
@@ -48,40 +53,6 @@ def splitted_line(text: str, width: int) -> str:
     final_lines = []
 
     for line in text.splitlines():
-
-        splitted_line = list(line)
-
-        line_length = len(line)
-
-        indices = list(find_whitespaces(line))
-
-        if indices:
-
-            starting_value = width
-
-            ws_list = list(filter(lambda x: x < starting_value, indices))
-
-            if ws_list:
-                ws = max(ws_list)
-                splitted_line[ws] = '\n'
-
-                starting_value = ws + width + 1
-
-                ws_list = list(filter(lambda x: x < starting_value, indices))
-
-                # while ws_list:
-
-                #    ws = max(ws_list)
-                #    splitted_line[ws] = '\n'
-
-                #    starting_value = ws + width + 1
-
-                #    if starting_value > line_length:
-                #        break
-
-                #   ws_list = list(
-                #       filter(lambda x: x < starting_value, indices))
-
-        final_lines.append(''.join(splitted_line))
+        final_lines.append(split_line(line, width))
 
     return '\n'.join(final_lines)
