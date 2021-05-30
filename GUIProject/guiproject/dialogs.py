@@ -65,7 +65,7 @@ class AboutDialog(QDialog):
         self.sub_layout.addWidget(github, 1, 1)
 
         self.main_layout.addLayout(self.sub_layout)
-        self.main_layout.addWidget(license)
+        self.main_layout.addWidget(self.license)
 
         self.setLayout(self.main_layout)
         self.change_font_size(self.font_size)
