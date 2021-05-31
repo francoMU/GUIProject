@@ -1,15 +1,18 @@
 import sys
+from collections import Sequence
 
 import pkg_resources
 from PyQt5.QtCore import Qt
 from PyQt5.QtGui import QIcon
 from PyQt5.QtWidgets import (QAction, QApplication, QDesktopWidget, QFileDialog,
-                             QMainWindow, QToolBar, QWidget, QVBoxLayout)
+                             QMainWindow, QToolBar, QWidget, QVBoxLayout,
+                             QGridLayout, QLabel, QComboBox)
 from guiproject.canvas import MplCanvas
 from guiproject.dialogs import AboutDialog
 from guiproject.message_boxes import create_error_message_box
 from guiproject.mixins import LoggerMixin
-from guiproject.selectable_points import DataSchema
+from guiproject.model import Model
+from guiproject.selectable_points import DataSchema, Data
 from monty.serialization import loadfn
 
 
@@ -53,45 +56,83 @@ class ApplicationWindow(QMainWindow, LoggerMixin):
         self.help_menu()
 
         self.tool_bar_items()
-
         self.central_canvas()
+
+        self.sub_layout = QGridLayout()
+        self.add_combo_box()
+
+        self.selected_text = QLabel()
+
+        self.sub_layout.addWidget(self.selected_text, 0, 1)
+
+        self.layout.addLayout(self.sub_layout)
+
+    def add_combo_box(self):
+
+        self.cb = QComboBox()
+        self.cb.addItems([Model.LINEAR,
+                          Model.QUADRATIC])
+        self.cb.currentIndexChanged.connect(self.selectionchange)
+
+        self.sub_layout.addWidget(self.cb, 0, 0)
+
+    def selectionchange(self, i):
+        self.selected_text.setText(self.cb.currentText())
 
     def central_canvas(self):
         self.sc = MplCanvas(self, width=5, height=4, dpi=100)
 
-        x_data = [0, 1, 2, 3, 4]
-        y_data = [0, 1, 20, 3, 40]
+        self.sc.mpl_connect('pick_event', self.onpick)
+        self.layout.addWidget(self.sc)
+
+    def add_points_canvas(self, x_data, y_data):
 
         for x, y in zip(x_data, y_data):
             self.sc.axes.plot(x,
                               y,
-                              "ro",
+                              color="red",
+                              marker="o",
+                              ls="none",
                               picker=True,
                               pickradius=5)
 
-        # https: // matplotlib.org / stable / users / event_handling.html
+        self.sc.draw()
 
-        # sc.mpl_connect('button_press_event', onclick)
+    def fit_functions(self, model: Model,
+                      x_data: Sequence = None,
+                      y_data: Sequence = None):
 
-        self.sc.mpl_connect('pick_event', self.onpick)
+        active_points = []
+        non_active_points = []
 
-        self.layout.addWidget(self.sc)
+        for line in self.sc.axes.get_lines():
+
+            if line.get_color() == "red":
+                active_points.append(line.get_data())
+            if line.get_color() == "blue":
+                non_active_points.append(line.get_data())
+
+        if model == Model.QUADRATIC:
+            pass
+            print("quadratic")
+        elif model == Model.LINEAR:
+            pass
+            print("linear")
+
+        print(active_points)
+        print(non_active_points)
 
     def onpick(self, event):
         thisline = event.artist
-        print(type(thisline))
 
-        print(thisline.get_color())
+        if thisline.get_color() == "red":
+            thisline.set_color("blue")
+        elif thisline.get_color() == "blue":
+            thisline.set_color("red")
 
-        thisline.set_color("blue")
+        self.fit_functions(self.cb.currentText())
 
         self.sc.draw()
-
-        xdata = thisline.get_xdata()
-        ydata = thisline.get_ydata()
-        ind = event.ind
-        points = tuple(zip(xdata[ind], ydata[ind]))
-        print('onpick points:', points)
 
     def file_menu(self):
         """Create a file submenu with an Open File item that opens a file
@@ -149,8 +190,11 @@ class ApplicationWindow(QMainWindow, LoggerMixin):
             raw_data = loadfn(filename)
 
             schema = DataSchema()
-            data = schema.load(raw_data)
-            self.data = data
+            data: Data = schema.load(raw_data)
+
+            self.add_points_canvas(data.delta, data.energies)
+
+
         except BaseException as exc:
             self.logger.error("A problem with loading the file occured", exc)
             message_box = create_error_message_box("File not valid",
