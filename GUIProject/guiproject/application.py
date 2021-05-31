@@ -9,6 +9,7 @@ from guiproject.canvas import MplCanvas
 from guiproject.dialogs import AboutDialog
 from guiproject.message_boxes import create_error_message_box
 from guiproject.mixins import LoggerMixin
+from guiproject.selectable_points import DataSchema
 from monty.serialization import loadfn
 
 
@@ -145,10 +146,11 @@ class ApplicationWindow(QMainWindow, LoggerMixin):
                                                                 "(*.json)")
 
         try:
-            data = loadfn(filename)
+            raw_data = loadfn(filename)
 
-
-
+            schema = DataSchema()
+            data = schema.load(raw_data)
+            self.data = data
         except BaseException as exc:
             self.logger.error("A problem with loading the file occured", exc)
             message_box = create_error_message_box("File not valid",
