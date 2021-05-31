@@ -7,6 +7,9 @@ from PyQt5.QtWidgets import (QAction, QApplication, QDesktopWidget, QFileDialog,
                              QMainWindow, QToolBar, QWidget, QVBoxLayout)
 from guiproject.canvas import MplCanvas
 from guiproject.dialogs import AboutDialog
+from guiproject.message_boxes import create_error_message_box
+from guiproject.mixins import LoggerMixin
+from monty.serialization import loadfn
 
 
 def onclick(event):
@@ -15,7 +18,7 @@ def onclick(event):
            event.x, event.y, event.xdata, event.ydata))
 
 
-class ApplicationWindow(QMainWindow):
+class ApplicationWindow(QMainWindow, LoggerMixin):
     """Create the main window that stores all of the widgets necessary for
     the application."""
 
@@ -28,6 +31,8 @@ class ApplicationWindow(QMainWindow):
 
         window_icon = pkg_resources.resource_filename('guiproject.images',
                                                       'ic_insert_drive_file_black_48dp_1x.png')
+
+        self.data = None
 
         self.setWindowIcon(QIcon(window_icon))
 
@@ -133,11 +138,22 @@ class ApplicationWindow(QMainWindow):
     def open_file(self):
         """Open a QFileDialog to allow the user to open a file into the
         application."""
-        filename, accepted = QFileDialog.getOpenFileName(self, 'Open File')
+        filename, selected_filter = QFileDialog.getOpenFileName(self,
+                                                                'Open File',
+                                                                '',
+                                                                "Text files "
+                                                                "(*.json)")
 
-        if accepted:
-            with open(filename) as file:
-                file.read()
+        try:
+            data = loadfn(filename)
+
+
+
+        except BaseException as exc:
+            self.logger.error("A problem with loading the file occured", exc)
+            message_box = create_error_message_box("File not valid",
+                                                   "Please open a different on")
+            message_box.exec()
 
 
 def main():
