@@ -6,7 +6,8 @@ from PyQt5.QtCore import Qt
 from PyQt5.QtGui import QIcon
 from PyQt5.QtWidgets import (QAction, QApplication, QDesktopWidget, QFileDialog,
                              QMainWindow, QToolBar, QWidget, QVBoxLayout,
-                             QGridLayout, QLabel, QComboBox)
+                             QGridLayout, QLabel, QComboBox, QLineEdit,
+                             QPushButton)
 from guiproject.canvas import MplCanvas
 from guiproject.dialogs import AboutDialog
 from guiproject.message_boxes import create_error_message_box
@@ -14,6 +15,7 @@ from guiproject.mixins import LoggerMixin
 from guiproject.model import Model
 from guiproject.selectable_points import DataSchema, Data
 from monty.serialization import loadfn
+from pymatgen.core import FloatWithUnit
 
 
 def onclick(event):
@@ -30,7 +32,7 @@ class ApplicationWindow(QMainWindow, LoggerMixin):
         """Initialize the components of the main window."""
         super(ApplicationWindow, self).__init__(parent)
 
-        self.resize(1024, 768)
+        self.resize(800, 800)
         self.setWindowTitle('Template')
 
         window_icon = pkg_resources.resource_filename('guiproject.images',
@@ -58,12 +60,52 @@ class ApplicationWindow(QMainWindow, LoggerMixin):
         self.tool_bar_items()
         self.central_canvas()
 
+        #
+        # Create the lower sub layout
+        #
+
         self.sub_layout = QGridLayout()
-        self.add_combo_box()
 
-        self.selected_text = QLabel()
+        self.model_label = QLabel("Model")
+        self.model_label.adjustSize()
+        self.model_label.setAlignment(Qt.AlignCenter)
+        self.sub_layout.addWidget(self.model_label, 0, 0)
 
-        self.sub_layout.addWidget(self.selected_text, 0, 1)
+        self.model = QLineEdit()
+        self.sub_layout.addWidget(self.model, 1, 0)
+
+        self.extractor_label = QLabel("Extractor")
+        self.extractor_label.adjustSize()
+        self.extractor_label.setAlignment(Qt.AlignCenter)
+        self.sub_layout.addWidget(self.extractor_label, 0, 1)
+
+        self.extractor = QLineEdit()
+        self.sub_layout.addWidget(self.extractor, 1, 1)
+
+        self.apply_button = QPushButton("Apply")
+        self.sub_layout.addWidget(self.apply_button, 0, 2, 3, -1)
+
+
+        self.display_label = QLabel("Value:")
+        self.display_label.setAlignment(Qt.AlignCenter)
+        self.sub_layout.addWidget(self.display_label, 2, 0)
+
+        self.display = QLabel("234234 GPa")
+        self.display.setAlignment(Qt.AlignCenter)
+        self.sub_layout.addWidget(self.display, 2, 1)
+
+
+
+
+        # self.add_combo_box()
+
+        # self.selected_text = QLabel()
+
+        # self.sub_layout.addWidget(self.selected_text, 0, 1)
+
+        #
+        #
+        #
 
         self.layout.addLayout(self.sub_layout)
 
@@ -80,7 +122,7 @@ class ApplicationWindow(QMainWindow, LoggerMixin):
         self.selected_text.setText(self.cb.currentText())
 
     def central_canvas(self):
-        self.sc = MplCanvas(self, width=5, height=4, dpi=100)
+        self.sc = MplCanvas(self, width=3, height=4, dpi=100)
 
         self.sc.mpl_connect('pick_event', self.onpick)
         self.layout.addWidget(self.sc)
