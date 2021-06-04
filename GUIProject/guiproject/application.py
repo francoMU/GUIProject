@@ -6,8 +6,8 @@ from PyQt5.QtCore import Qt
 from PyQt5.QtGui import QIcon
 from PyQt5.QtWidgets import (QAction, QApplication, QDesktopWidget, QFileDialog,
                              QMainWindow, QToolBar, QWidget, QVBoxLayout,
-                             QGridLayout, QLabel, QComboBox, QLineEdit,
-                             QPushButton)
+                             QLabel, QComboBox, QPushButton, QHBoxLayout)
+from guiproject.result_label import ResultLabel
 from guiproject.canvas import MplCanvas
 from guiproject.dialogs import AboutDialog
 from guiproject.message_boxes import create_error_message_box
@@ -15,7 +15,6 @@ from guiproject.mixins import LoggerMixin
 from guiproject.model import Model
 from guiproject.selectable_points import DataSchema, Data
 from monty.serialization import loadfn
-from pymatgen.core import FloatWithUnit
 
 
 def onclick(event):
@@ -32,7 +31,7 @@ class ApplicationWindow(QMainWindow, LoggerMixin):
         """Initialize the components of the main window."""
         super(ApplicationWindow, self).__init__(parent)
 
-        self.resize(800, 800)
+        # self.resize(800, 800)
         self.setWindowTitle('Template')
 
         window_icon = pkg_resources.resource_filename('guiproject.images',
@@ -41,12 +40,6 @@ class ApplicationWindow(QMainWindow, LoggerMixin):
         self.data = None
 
         self.setWindowIcon(QIcon(window_icon))
-
-        self.layout = QVBoxLayout()
-
-        self.widget = QWidget()
-        self.widget.setLayout(self.layout)
-        self.setCentralWidget(self.widget)
 
         self.menu_bar = self.menuBar()
         self.about_dialog = AboutDialog()
@@ -58,56 +51,52 @@ class ApplicationWindow(QMainWindow, LoggerMixin):
         self.help_menu()
 
         self.tool_bar_items()
-        self.central_canvas()
 
-        #
-        # Create the lower sub layout
-        #
+        # Main Layout
 
-        self.sub_layout = QGridLayout()
+        self.layout = QHBoxLayout()
+        self.widget = QWidget()
+        self.widget.setLayout(self.layout)
+        self.setCentralWidget(self.widget)
 
-        self.model_label = QLabel("Model")
-        self.model_label.adjustSize()
-        self.model_label.setAlignment(Qt.AlignCenter)
-        self.sub_layout.addWidget(self.model_label, 0, 0)
+        self.painter_label = QLabel("Paint")
+        self.painter_label.setAlignment(Qt.AlignCenter)
+        self.painter_label.setFixedSize(300, 300)
+        self.painter_label.setStyleSheet("border: 1px solid black;")
+        self.layout.addWidget(self.painter_label)
 
-        self.model = QLineEdit()
-        self.sub_layout.addWidget(self.model, 1, 0)
+        # Button
+        self.sub_layout_1 = QVBoxLayout()
+        self.layout.addLayout(self.sub_layout_1)
 
-        self.extractor_label = QLabel("Extractor")
-        self.extractor_label.adjustSize()
-        self.extractor_label.setAlignment(Qt.AlignCenter)
-        self.sub_layout.addWidget(self.extractor_label, 0, 1)
+        self.clear_button = QPushButton('Clear')
+        self.sub_layout_1.addWidget(self.clear_button)
 
-        self.extractor = QLineEdit()
-        self.sub_layout.addWidget(self.extractor, 1, 1)
+        self.convert_button = QPushButton('Convert')
+        self.sub_layout_1.addWidget(self.convert_button)
 
-        self.apply_button = QPushButton("Apply")
-        self.sub_layout.addWidget(self.apply_button, 0, 2, 3, -1)
+        # Converted
+        self.converter_label = MplCanvas()
+        self.converter_label.setFixedSize(300, 300)
+        self.converter_label.setStyleSheet("border: 1px solid black;")
+        self.converter_label.draw()
+        self.layout.addWidget(self.converter_label)
+
+        # Button
+        self.sub_layout_2 = QVBoxLayout()
+        self.layout.addLayout(self.sub_layout_2)
+
+        self.clear_button = QPushButton('Predict')
+        self.sub_layout_2.addWidget(self.clear_button)
+
+        # Predicted Number
+        self.result_label = ResultLabel()
+        self.result_label.setFixedSize(300, 300)
+        self.result_label.setStyleSheet("border: 1px solid black;")
+        self.result_label.set_number(9)
+        self.layout.addWidget(self.result_label)
 
 
-        self.display_label = QLabel("Value:")
-        self.display_label.setAlignment(Qt.AlignCenter)
-        self.sub_layout.addWidget(self.display_label, 2, 0)
-
-        self.display = QLabel("234234 GPa")
-        self.display.setAlignment(Qt.AlignCenter)
-        self.sub_layout.addWidget(self.display, 2, 1)
-
-
-
-
-        # self.add_combo_box()
-
-        # self.selected_text = QLabel()
-
-        # self.sub_layout.addWidget(self.selected_text, 0, 1)
-
-        #
-        #
-        #
-
-        self.layout.addLayout(self.sub_layout)
 
     def add_combo_box(self):
 
