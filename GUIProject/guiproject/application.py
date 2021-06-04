@@ -6,13 +6,14 @@ from PyQt5.QtCore import Qt
 from PyQt5.QtGui import QIcon
 from PyQt5.QtWidgets import (QAction, QApplication, QDesktopWidget, QFileDialog,
                              QMainWindow, QToolBar, QWidget, QVBoxLayout,
-                             QLabel, QComboBox, QPushButton, QHBoxLayout)
-from guiproject.result_label import ResultLabel
+                             QComboBox, QPushButton, QHBoxLayout)
 from guiproject.canvas import MplCanvas
 from guiproject.dialogs import AboutDialog
 from guiproject.message_boxes import create_error_message_box
 from guiproject.mixins import LoggerMixin
 from guiproject.model import Model
+from guiproject.paint_widget import PaintWidget
+from guiproject.result_label import ResultLabel
 from guiproject.selectable_points import DataSchema, Data
 from monty.serialization import loadfn
 
@@ -32,7 +33,7 @@ class ApplicationWindow(QMainWindow, LoggerMixin):
         super(ApplicationWindow, self).__init__(parent)
 
         # self.resize(800, 800)
-        self.setWindowTitle('Template')
+        self.setWindowTitle('Digit predictor')
 
         window_icon = pkg_resources.resource_filename('guiproject.images',
                                                       'ic_insert_drive_file_black_48dp_1x.png')
@@ -59,8 +60,9 @@ class ApplicationWindow(QMainWindow, LoggerMixin):
         self.widget.setLayout(self.layout)
         self.setCentralWidget(self.widget)
 
-        self.painter_label = QLabel("Paint")
-        self.painter_label.setAlignment(Qt.AlignCenter)
+        # Painter application
+
+        self.painter_label = PaintWidget()
         self.painter_label.setFixedSize(300, 300)
         self.painter_label.setStyleSheet("border: 1px solid black;")
         self.layout.addWidget(self.painter_label)
@@ -70,6 +72,8 @@ class ApplicationWindow(QMainWindow, LoggerMixin):
         self.layout.addLayout(self.sub_layout_1)
 
         self.clear_button = QPushButton('Clear')
+        self.clear_button.clicked.connect(self.painter_label.clear)
+
         self.sub_layout_1.addWidget(self.clear_button)
 
         self.convert_button = QPushButton('Convert')
@@ -96,7 +100,23 @@ class ApplicationWindow(QMainWindow, LoggerMixin):
         self.result_label.set_number(9)
         self.layout.addWidget(self.result_label)
 
+    #   self.points = QPolygon()
 
+    # def mousePressEvent(self, e):
+    #    self.points << e.pos()
+    #    self.update()
+
+    # def paintEvent(self, ev):
+    #    qp = QPainter(self)
+    #     qp.setRenderHint(QPainter.Antialiasing)
+    #    pen = QPen(Qt.red, 5)
+    #    brush = QBrush(Qt.red)
+    #    qp.setPen(pen)
+    #    qp.setBrush(brush)
+    #    for i in range(self.points.count()):
+    #        qp.drawEllipse(self.points.point(i), 5, 5)
+    # or
+    # qp.drawPoints(self.points)
 
     def add_combo_box(self):
 
