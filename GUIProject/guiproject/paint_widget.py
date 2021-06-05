@@ -4,6 +4,7 @@ from PIL.Image import LANCZOS
 from PyQt5.QtCore import Qt
 from PyQt5.QtGui import QPainter, QPen, QBrush, QPolygon
 from PyQt5.QtWidgets import (QWidget)
+from guiproject.defaults import RADIUS_SIZE
 
 
 class PaintWidget(QWidget):
@@ -13,7 +14,7 @@ class PaintWidget(QWidget):
         self.x_limit = (0, 300)
         self.y_limit = (0, 300)
 
-        self.radius_size = 5
+        self.radius_size = RADIUS_SIZE
 
         self.setGeometry(0, 0, 300, 300)
 
@@ -78,7 +79,6 @@ class PaintWidget(QWidget):
         img = Image.fromarray(image_matrix)
 
         resized_image = img.resize((28, 28), LANCZOS)
-        resized_image.save('my.png')
 
         return np.array(resized_image).transpose()
 

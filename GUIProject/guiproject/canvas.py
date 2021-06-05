@@ -11,24 +11,18 @@ from matplotlib.backends.backend_qt5agg import \
     FigureCanvasQTAgg as FigureCanvas
 from matplotlib.figure import Figure
 
-from guiproject.mnist import training_images
-
 
 class MplCanvas(FigureCanvas):
     """
     Canvas for plotting the points of a fit
     """
 
-    def __init__(self, parent=None, width=5, height=5):
-        self._figure = Figure(figsize=(width, height))
+    def __init__(self, parent=None):
+        self._figure = Figure()
 
         self.axes = self._figure.add_subplot()
-
-        images = training_images()
-
-        self.axes.imshow(255 - images[0, :, :], aspect='equal', cmap='gray')
         self.axes.set_axis_off()
-        self._figure.tight_layout()
+        self._figure.tight_layout(pad=1.00, h_pad=0, w_pad=0)
 
         super().__init__(self._figure)
 
@@ -39,12 +33,11 @@ class MplCanvas(FigureCanvas):
         else:
             self.axes.imshow(255 - image[:, :], aspect='equal', cmap='gray')
             self.axes.set_axis_off()
-            self._figure.tight_layout()
+        self._figure.tight_layout(pad=1.00, h_pad=0, w_pad=0)
 
     def clear(self):
         self.axes.clear()
         self.axes.set_axis_off()
-        self._figure.tight_layout()
         self.draw()
 
     @property
