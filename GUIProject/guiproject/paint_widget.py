@@ -63,7 +63,7 @@ class PaintWidget(QWidget):
         for i in range(self.points.count()):
             point = self.points.point(i)
 
-            y = int(299 - point.y())
+            y = int(point.y())
             x = int(point.x())
 
             central_point = np.array((x, y))
@@ -79,6 +79,8 @@ class PaintWidget(QWidget):
 
         resized_image = img.resize((28, 28), LANCZOS)
         resized_image.save('my.png')
+
+        return np.array(resized_image).transpose()
 
     @staticmethod
     def list_of_points(radius):

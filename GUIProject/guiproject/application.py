@@ -78,7 +78,7 @@ class ApplicationWindow(QMainWindow, LoggerMixin):
 
         self.convert_button = QPushButton('Convert')
         self.sub_layout_1.addWidget(self.convert_button)
-        self.convert_button.clicked.connect(self.painter_label.get_image_matrix)
+        self.convert_button.clicked.connect(self.update_canvas)
 
         # Converted
         self.converter_label = MplCanvas()
@@ -86,6 +86,8 @@ class ApplicationWindow(QMainWindow, LoggerMixin):
         self.converter_label.setStyleSheet("border: 1px solid black;")
         self.converter_label.draw()
         self.layout.addWidget(self.converter_label)
+
+        self.clear_button.clicked.connect(self.converter_label.clear)
 
         # Button
         self.sub_layout_2 = QVBoxLayout()
@@ -100,6 +102,14 @@ class ApplicationWindow(QMainWindow, LoggerMixin):
         self.result_label.setStyleSheet("border: 1px solid black;")
         self.result_label.set_number(9)
         self.layout.addWidget(self.result_label)
+
+    def update_canvas(self):
+
+        image = self.painter_label.get_image_matrix()
+
+        self.converter_label.update_image(image)
+
+        self.converter_label.draw()
 
     #   self.points = QPolygon()
 

@@ -3,6 +3,8 @@ Module containing handle all the details of talking to user interface toolkits
 """
 import matplotlib
 
+import numpy as np
+
 matplotlib.use('Qt5Agg')
 
 from matplotlib.backends.backend_qt5agg import \
@@ -29,6 +31,21 @@ class MplCanvas(FigureCanvas):
         self._figure.tight_layout()
 
         super().__init__(self._figure)
+
+    def update_image(self, image):
+
+        if np.allclose(image, 0):
+            self.clear()
+        else:
+            self.axes.imshow(255 - image[:, :], aspect='equal', cmap='gray')
+            self.axes.set_axis_off()
+            self._figure.tight_layout()
+
+    def clear(self):
+        self.axes.clear()
+        self.axes.set_axis_off()
+        self._figure.tight_layout()
+        self.draw()
 
     @property
     def figure(self):
