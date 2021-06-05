@@ -78,6 +78,7 @@ class ApplicationWindow(QMainWindow, LoggerMixin):
 
         self.convert_button = QPushButton('Convert')
         self.sub_layout_1.addWidget(self.convert_button)
+        self.convert_button.clicked.connect(self.painter_label.get_image_matrix)
 
         # Converted
         self.converter_label = MplCanvas()
