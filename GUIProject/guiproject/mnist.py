@@ -1,14 +1,37 @@
 import gzip
+from typing import Optional
 
 import numpy as np
 import pkg_resources
 
 
-def training_images():
-    filename = pkg_resources.resource_filename('guiproject.data',
-                                               'train-images-idx3-ubyte.gz')
+def load_training_images(number: Optional[int] = None):
+    images = load_images('train-images-idx3-ubyte.gz')
+    if number is None:
+        return images
+    return images[:number, :, :]
 
-    with gzip.open(filename, 'r') as f:
+
+def load_test_images():
+    return load_images('t10k-images-idx3-ubyte.gz')
+
+
+def load_test_labels():
+    return load_labels('t10k-labels-idx1-ubyte.gz')
+
+
+def load_training_labels(number: Optional[int] = None):
+    labels = load_labels('train-labels-idx1-ubyte.gz')
+    if labels is None:
+        return labels
+    return labels[:number]
+
+
+def load_images(filename: str):
+    resolved_filename = pkg_resources.resource_filename('guiproject.data',
+                                                        filename)
+
+    with gzip.open(resolved_filename, 'r') as f:
         # first 4 bytes is a magic number
         magic_number = int.from_bytes(f.read(4), 'big')
         # second 4 bytes is the number of images
@@ -25,8 +48,11 @@ def training_images():
         return images
 
 
-def training_labels():
-    with gzip.open('data/train-labels-idx1-ubyte.gz', 'r') as f:
+def load_labels(filename: str):
+    resolved_filename = pkg_resources.resource_filename('guiproject.data',
+                                                        filename)
+
+    with gzip.open(resolved_filename, 'r') as f:
         # first 4 bytes is a magic number
         magic_number = int.from_bytes(f.read(4), 'big')
         # second 4 bytes is the number of labels
@@ -36,16 +62,3 @@ def training_labels():
         label_data = f.read()
         labels = np.frombuffer(label_data, dtype=np.uint8)
         return labels
-
-
-if __name__ == "__main__":
-    import matplotlib.pyplot as plt
-
-    training_images = training_images()
-
-    print(training_images.shape)
-
-    print(training_images[0, :, :])
-
-    plt.imshow(training_images[0, :, :])
-    plt.show()
