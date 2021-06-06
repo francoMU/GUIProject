@@ -29,7 +29,6 @@ class ApplicationWindow(QMainWindow, LoggerMixin):
         """Initialize the components of the main window."""
         super(ApplicationWindow, self).__init__(parent)
 
-        # self.resize(800, 800)
         self.setWindowTitle('CNN Digit Predictor')
 
         self.setFixedSize(1110, 405)
