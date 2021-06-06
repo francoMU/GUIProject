@@ -109,7 +109,7 @@ class ApplicationWindow(QMainWindow, LoggerMixin):
 
         # load model
         resolved_filename = pkg_resources.resource_filename('guiproject.data',
-                                                            'fast_model.h5')
+                                                            'full_model.h5')
 
         self.model = load_model(resolved_filename, compile=True)
 
