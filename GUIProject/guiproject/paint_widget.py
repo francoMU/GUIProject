@@ -1,3 +1,5 @@
+"""Module containing widgets for drawing figures"""
+
 import numpy as np
 from PIL import Image
 from PIL.Image import LANCZOS
@@ -5,9 +7,10 @@ from PyQt5.QtCore import Qt
 from PyQt5.QtGui import QPainter, QPen, QBrush, QPolygon
 from PyQt5.QtWidgets import (QWidget)
 from guiproject.defaults import RADIUS_SIZE
+from guiproject.mixins import LoggerMixin
 
 
-class PaintWidget(QWidget):
+class PaintWidget(QWidget, LoggerMixin):
     def __init__(self):
         super().__init__()
 
@@ -30,8 +33,8 @@ class PaintWidget(QWidget):
                 self.update()
 
     def is_in_widget(self, x_point, y_point):
-        if x_point >= self.x_limit[0] and x_point < self.x_limit[1]:
-            if y_point >= self.y_limit[0] and y_point < self.y_limit[1]:
+        if self.x_limit[0] <= x_point < self.x_limit[1]:
+            if self.y_limit[0] <= y_point < self.y_limit[1]:
                 return True
 
     def mouseMoveEvent(self, event):
@@ -89,7 +92,7 @@ class PaintWidget(QWidget):
 
         for x in range(- radius, radius + 1):
             for y in range(- radius, radius + 1):
-                if (x * x + y * y <= radius * radius):
+                if x ** 2 + y ** 2 <= radius ** 2:
                     points.append((x, y))
 
         return np.array(points, dtype=int)
@@ -99,7 +102,7 @@ class PaintWidget(QWidget):
         for i in range(self.points.count()):
             point = self.points.point(i)
 
-            print(point.y(), point.x())
+            self.logger.debug("Point: %d %d", point.x(), point.y())
 
         self.points.clear()
         self.update()

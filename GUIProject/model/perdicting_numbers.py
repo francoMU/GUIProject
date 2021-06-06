@@ -16,14 +16,14 @@ from sklearn.model_selection import train_test_split
 
 
 test_images = load_test_images().astype('float32').reshape(-1, 28, 28, 1)
-training_images = load_training_images(10000).astype('float32').reshape(-1, 28,
-                                                                        28, 1)
+training_images = load_training_images().astype('float32').reshape(-1, 28,
+                                                                   28, 1)
 
 test_images = test_images / 255.0
 training_images = training_images / 255.0
 
 test_labels = to_categorical(load_test_labels())
-training_labels = to_categorical(load_training_labels(10000))
+training_labels = to_categorical(load_training_labels())
 
 print(training_labels.shape)
 print(test_images.shape)
@@ -55,7 +55,7 @@ def standardize(x):
 
 # epochs = 50
 
-epochs = 20
+epochs = 50
 batch_size = 64
 
 model = Sequential()
@@ -113,7 +113,7 @@ history = model.fit(train_gen,
 
 PATH = Path(__file__).parent
 
-model.save(PATH / 'fast_model.h5', save_format='h5')
+model.save(PATH / 'full_model.h5', save_format='h5')
 
 #
 # Test the whole model

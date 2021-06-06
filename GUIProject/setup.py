@@ -1,6 +1,6 @@
 from pathlib import Path
 
-from setuptools import setup, find_packages
+from setuptools import find_packages, setup
 
 with open(Path(__file__).parent / "requirements.txt", "r") as file:
     requirements = file.readlines()
@@ -19,9 +19,7 @@ setup(
         'guiproject.data': ['license.txt']
     },
     entry_points={
-        'console_scripts': [
-            'guiproject=guiproject.application:main'
-        ]
+        'console_scripts': ['guiproject=guiproject.application:main']
     },
     zip_safe=False,
     keywords='GUIProject',

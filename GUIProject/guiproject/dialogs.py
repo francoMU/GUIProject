@@ -34,7 +34,7 @@ class AboutDialog(QDialog):
 
         license_text = self.get_license_text()
 
-        self.split_lines(license_text)
+        license_text = splitted_line(license_text, 120)
 
         self.license = QLabel(license_text)
         self.license.setAlignment(Qt.AlignCenter)
@@ -74,11 +74,6 @@ class AboutDialog(QDialog):
         return resources.read_text('guiproject.data',
                                    'license.txt')
 
-    def split_lines(self, text: str, width=120):
-        """This method splits lines after certain number of characters"""
-
-        return splitted_line(text, width)
-
     def change_font_size(self, size: float):
         """Changes all font sizes"""
         for i in range(self.main_layout.count()):
@@ -98,7 +93,4 @@ class AboutDialog(QDialog):
         delta = np.sign(event.angleDelta().y())
         self.font_size += delta
         self.change_font_size(self.font_size)
-
-    def resizeEvent(self, event):
-        print(self.size())
-        print("fuck")
+        self.resize(self.main_layout.sizeHint())

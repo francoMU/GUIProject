@@ -1,25 +1,24 @@
+"""
+Module containing the main application
+"""
+
 import sys
 
 import numpy as np
 import pkg_resources
-from PyQt5.QtCore import Qt
+from PyQt5.QtCore import Qt, QDir
 from PyQt5.QtGui import QIcon
 from PyQt5.QtWidgets import (QAction, QApplication, QDesktopWidget, QMainWindow,
                              QToolBar, QWidget, QVBoxLayout,
-                             QComboBox, QPushButton, QHBoxLayout)
+                             QPushButton, QHBoxLayout, QFileDialog,
+                             QDialog)
 from guiproject.canvas import MplCanvas
 from guiproject.dialogs import AboutDialog
+from guiproject.message_boxes import create_error_message_box
 from guiproject.mixins import LoggerMixin
-from guiproject.model import Model
 from guiproject.paint_widget import PaintWidget
 from guiproject.result_label import ResultLabel
 from keras.models import load_model
-
-
-def onclick(event):
-    print('%s click: button=%d, x=%d, y=%d, xdata=%f, ydata=%f' %
-          ('double' if event.dblclick else 'single', event.button,
-           event.x, event.y, event.xdata, event.ydata))
 
 
 class ApplicationWindow(QMainWindow, LoggerMixin):
@@ -31,7 +30,9 @@ class ApplicationWindow(QMainWindow, LoggerMixin):
         super(ApplicationWindow, self).__init__(parent)
 
         # self.resize(800, 800)
-        self.setWindowTitle('Digit predictor')
+        self.setWindowTitle('CNN Digit Predictor')
+
+        self.setFixedSize(1110, 405)
 
         window_icon = pkg_resources.resource_filename('guiproject.images',
                                                       'ic_insert_drive_file_black_48dp_1x.png')
@@ -100,7 +101,7 @@ class ApplicationWindow(QMainWindow, LoggerMixin):
         self.result_label = ResultLabel()
         self.result_label.setFixedSize(300, 300)
         self.result_label.setStyleSheet("border: 1px solid black;")
-        self.result_label.set_number(1)
+        self.result_label.clear()
         self.layout.addWidget(self.result_label)
 
         self.clear_button.clicked.connect(self.result_label.clear)
@@ -108,7 +109,6 @@ class ApplicationWindow(QMainWindow, LoggerMixin):
         self.image = None
 
         # load model
-
         resolved_filename = pkg_resources.resource_filename('guiproject.data',
                                                             'fast_model.h5')
 
@@ -132,17 +132,6 @@ class ApplicationWindow(QMainWindow, LoggerMixin):
 
             self.result_label.set_number(result)
 
-    def add_combo_box(self):
-        self.cb = QComboBox()
-        self.cb.addItems([Model.LINEAR,
-                          Model.QUADRATIC])
-        self.cb.currentIndexChanged.connect(self.selectionchange)
-
-        self.sub_layout.addWidget(self.cb, 0, 0)
-
-    def selectionchange(self, i):
-        self.selected_text.setText(self.cb.currentText())
-
     def file_menu(self):
         """Create a file submenu with an Open File item that opens a file
         dialog."""
@@ -151,7 +140,7 @@ class ApplicationWindow(QMainWindow, LoggerMixin):
         self.open_action = QAction('Open File', self)
         self.open_action.setStatusTip('Open a file into Template.')
         self.open_action.setShortcut('CTRL+O')
-        # self.open_action.triggered.connect(self.open_file)
+        self.open_action.triggered.connect(self.open_file)
 
         self.exit_action = QAction('Exit Application', self)
         self.exit_action.setStatusTip('Exit the application.')
@@ -182,9 +171,26 @@ class ApplicationWindow(QMainWindow, LoggerMixin):
         open_icon = pkg_resources.resource_filename('guiproject.images',
                                                     'ic_open_in_new_black_48dp_1x.png')
         tool_bar_open_action = QAction(QIcon(open_icon), 'Open File', self)
-        # tool_bar_open_action.triggered.connect(self.open_file)
+        tool_bar_open_action.triggered.connect(self.open_file)
 
         self.tool_bar.addAction(tool_bar_open_action)
+
+    def open_file(self):
+        dialog = QFileDialog(parent=self)
+        dialog.setWindowTitle('Open keras model')
+        dialog.setDirectory(QDir.currentPath())
+        dialog.setFileMode(QFileDialog.ExistingFile)
+        if dialog.exec_() == QDialog.Accepted:
+            file_full_path = str(dialog.selectedFiles()[0])
+
+            try:
+                self.model = load_model(file_full_path, compile=True)
+            except OSError:
+                error_box = create_error_message_box("Wrong file",
+                                                     "This file is not a "
+                                                     "valid model file"
+                                                     )
+                error_box.exec()
 
 
 def main():

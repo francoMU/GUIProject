@@ -1,3 +1,5 @@
+"""Tests for utility methods"""
+
 from pathlib import Path
 
 import pytest
@@ -9,6 +11,7 @@ PATH = Path(__file__).parent
 
 @pytest.fixture
 def example_text():
+    """Fixture for sample text file"""
     with open(PATH / "text.txt") as file:
         yield file.read()
 

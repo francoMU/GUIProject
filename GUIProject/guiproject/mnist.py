@@ -3,6 +3,7 @@ from typing import Optional
 
 import numpy as np
 import pkg_resources
+from monty.serialization import dumpfn
 
 
 def load_training_images(number: Optional[int] = None):
@@ -62,3 +63,5 @@ def load_labels(filename: str):
         label_data = f.read()
         labels = np.frombuffer(label_data, dtype=np.uint8)
         return labels
+
+

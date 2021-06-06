@@ -32,6 +32,9 @@ def get_index(indices: Iterable[int], width):
 def split_line(line: str, width: int) -> str:
     # convert line to list in order to make it mutable
 
+    if len(line) <= width:
+        return line
+
     mutable_line = list(line)
 
     indices = find_whitespaces(line.rstrip())
