@@ -1,21 +1,19 @@
 import sys
-from collections import Sequence
 
+import numpy as np
 import pkg_resources
 from PyQt5.QtCore import Qt
 from PyQt5.QtGui import QIcon
-from PyQt5.QtWidgets import (QAction, QApplication, QDesktopWidget, QFileDialog,
-                             QMainWindow, QToolBar, QWidget, QVBoxLayout,
+from PyQt5.QtWidgets import (QAction, QApplication, QDesktopWidget, QMainWindow,
+                             QToolBar, QWidget, QVBoxLayout,
                              QComboBox, QPushButton, QHBoxLayout)
 from guiproject.canvas import MplCanvas
 from guiproject.dialogs import AboutDialog
-from guiproject.message_boxes import create_error_message_box
 from guiproject.mixins import LoggerMixin
 from guiproject.model import Model
 from guiproject.paint_widget import PaintWidget
 from guiproject.result_label import ResultLabel
-from guiproject.selectable_points import DataSchema, Data
-from monty.serialization import loadfn
+from keras.models import load_model
 
 
 def onclick(event):
@@ -93,44 +91,48 @@ class ApplicationWindow(QMainWindow, LoggerMixin):
         self.sub_layout_2 = QVBoxLayout()
         self.layout.addLayout(self.sub_layout_2)
 
-        self.clear_button = QPushButton('Predict')
-        self.sub_layout_2.addWidget(self.clear_button)
+        self.predict_button = QPushButton('Predict')
+        self.sub_layout_2.addWidget(self.predict_button)
+
+        self.predict_button.clicked.connect(self.update_predict)
 
         # Predicted Number
         self.result_label = ResultLabel()
         self.result_label.setFixedSize(300, 300)
         self.result_label.setStyleSheet("border: 1px solid black;")
-        self.result_label.set_number(9)
+        self.result_label.set_number(1)
         self.layout.addWidget(self.result_label)
 
+        self.clear_button.clicked.connect(self.result_label.clear)
+
+        self.image = None
+
+        # load model
+
+        resolved_filename = pkg_resources.resource_filename('guiproject.data',
+                                                            'fast_model.h5')
+
+        self.model = load_model(resolved_filename, compile=True)
+
     def update_canvas(self):
+        self.image = self.painter_label.get_image_matrix()
 
-        image = self.painter_label.get_image_matrix()
-
-        self.converter_label.update_image(image)
+        self.converter_label.update_image(self.image)
 
         self.converter_label.draw()
 
-    #   self.points = QPolygon()
+    def update_predict(self):
+        if self.image is not None:
+            image = np.array(self.image).astype('float32').reshape(-1, 28,
+                                                                   28, 1)
 
-    # def mousePressEvent(self, e):
-    #    self.points << e.pos()
-    #    self.update()
+            image = image / 255.0
 
-    # def paintEvent(self, ev):
-    #    qp = QPainter(self)
-    #     qp.setRenderHint(QPainter.Antialiasing)
-    #    pen = QPen(Qt.red, 5)
-    #    brush = QBrush(Qt.red)
-    #    qp.setPen(pen)
-    #    qp.setBrush(brush)
-    #    for i in range(self.points.count()):
-    #        qp.drawEllipse(self.points.point(i), 5, 5)
-    # or
-    # qp.drawPoints(self.points)
+            result = self.model.predict(image).argmax()
+
+            self.result_label.set_number(result)
 
     def add_combo_box(self):
-
         self.cb = QComboBox()
         self.cb.addItems([Model.LINEAR,
                           Model.QUADRATIC])
@@ -141,61 +143,6 @@ class ApplicationWindow(QMainWindow, LoggerMixin):
     def selectionchange(self, i):
         self.selected_text.setText(self.cb.currentText())
 
-    def central_canvas(self):
-        self.sc = MplCanvas(self, width=3, height=4, dpi=100)
-
-        self.sc.mpl_connect('pick_event', self.onpick)
-        self.layout.addWidget(self.sc)
-
-    def add_points_canvas(self, x_data, y_data):
-
-        for x, y in zip(x_data, y_data):
-            self.sc.axes.plot(x,
-                              y,
-                              color="red",
-                              marker="o",
-                              ls="none",
-                              picker=True,
-                              pickradius=5)
-
-        self.sc.draw()
-
-    def fit_functions(self, model: Model,
-                      x_data: Sequence = None,
-                      y_data: Sequence = None):
-
-        active_points = []
-        non_active_points = []
-
-        for line in self.sc.axes.get_lines():
-
-            if line.get_color() == "red":
-                active_points.append(line.get_data())
-            if line.get_color() == "blue":
-                non_active_points.append(line.get_data())
-
-        if model == Model.QUADRATIC:
-            pass
-            print("quadratic")
-        elif model == Model.LINEAR:
-            pass
-            print("linear")
-
-        print(active_points)
-        print(non_active_points)
-
-    def onpick(self, event):
-        thisline = event.artist
-
-        if thisline.get_color() == "red":
-            thisline.set_color("blue")
-        elif thisline.get_color() == "blue":
-            thisline.set_color("red")
-
-        self.fit_functions(self.cb.currentText())
-
-        self.sc.draw()
-
     def file_menu(self):
         """Create a file submenu with an Open File item that opens a file
         dialog."""
@@ -204,7 +151,7 @@ class ApplicationWindow(QMainWindow, LoggerMixin):
         self.open_action = QAction('Open File', self)
         self.open_action.setStatusTip('Open a file into Template.')
         self.open_action.setShortcut('CTRL+O')
-        self.open_action.triggered.connect(self.open_file)
+        # self.open_action.triggered.connect(self.open_file)
 
         self.exit_action = QAction('Exit Application', self)
         self.exit_action.setStatusTip('Exit the application.')
@@ -235,33 +182,9 @@ class ApplicationWindow(QMainWindow, LoggerMixin):
         open_icon = pkg_resources.resource_filename('guiproject.images',
                                                     'ic_open_in_new_black_48dp_1x.png')
         tool_bar_open_action = QAction(QIcon(open_icon), 'Open File', self)
-        tool_bar_open_action.triggered.connect(self.open_file)
+        # tool_bar_open_action.triggered.connect(self.open_file)
 
         self.tool_bar.addAction(tool_bar_open_action)
-
-    def open_file(self):
-        """Open a QFileDialog to allow the user to open a file into the
-        application."""
-        filename, selected_filter = QFileDialog.getOpenFileName(self,
-                                                                'Open File',
-                                                                '',
-                                                                "Text files "
-                                                                "(*.json)")
-
-        try:
-            raw_data = loadfn(filename)
-
-            schema = DataSchema()
-            data: Data = schema.load(raw_data)
-
-            self.add_points_canvas(data.delta, data.energies)
-
-
-        except BaseException as exc:
-            self.logger.error("A problem with loading the file occured", exc)
-            message_box = create_error_message_box("File not valid",
-                                                   "Please open a different on")
-            message_box.exec()
 
 
 def main():

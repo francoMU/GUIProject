@@ -31,7 +31,7 @@ class MplCanvas(FigureCanvas):
         if np.allclose(image, 0):
             self.clear()
         else:
-            self.axes.imshow(255 - image[:, :], aspect='equal', cmap='gray')
+            self.axes.imshow(image[:, :], aspect='equal', cmap='binary')
             self.axes.set_axis_off()
         self._figure.tight_layout(pad=1.00, h_pad=0, w_pad=0)
 
