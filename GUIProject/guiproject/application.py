@@ -44,7 +44,7 @@ class ApplicationWindow(QMainWindow, LoggerMixin):
         self.about_dialog = AboutDialog()
 
         self.status_bar = self.statusBar()
-        self.status_bar.showMessage('Ready', 5000)
+        self.status_bar.showMessage('Start GUI')
 
         self.file_menu()
         self.help_menu()
@@ -111,7 +111,13 @@ class ApplicationWindow(QMainWindow, LoggerMixin):
         resolved_filename = pkg_resources.resource_filename('guiproject.data',
                                                             'full_model.h5')
 
+        self.status_bar.showMessage('Start loading model')
         self.model = load_model(resolved_filename, compile=True)
+
+        image = np.zeros((1, 28, 28, 1)).astype('float32')
+        self.model.predict(image).argmax()
+
+        self.status_bar.showMessage('Ready', 5000)
 
     def update_canvas(self):
         self.image = self.painter_label.get_image_matrix()
